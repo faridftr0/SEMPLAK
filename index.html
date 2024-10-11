@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="data/K3_1.js"></script>
+        <script src="data/Semplak_integrasi_2.js"></script>
+        <script src="data/Pemanfaatan_3.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-6.5633219392254665,106.76112303787636],[-6.559976364224547,106.76820179123611]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GOOGLE_0');
+        map.getPane('pane_GOOGLE_0').style.zIndex = 400;
+        var layer_GOOGLE_0 = L.tileLayer('http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}', {
+            pane: 'pane_GOOGLE_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 40
+        });
+        layer_GOOGLE_0;
+        map.addLayer(layer_GOOGLE_0);
+        function pop_K3_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TIPEHAK'] !== null ? autolinker.link(feature.properties['TIPEHAK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TAHUN'] !== null ? autolinker.link(feature.properties['TAHUN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NIB'] !== null ? autolinker.link(feature.properties['NIB'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LUASTERTUL'] !== null ? autolinker.link(feature.properties['LUASTERTUL'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LUASPETA'] !== null ? autolinker.link(feature.properties['LUASPETA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SUMBERGEOM'] !== null ? autolinker.link(feature.properties['SUMBERGEOM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PENGGUNAAN'] !== null ? autolinker.link(feature.properties['PENGGUNAAN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_K3_1_0() {
+            return {
+                pane: 'pane_K3_1',
+                interactive: true,
+            }
+        }
+        function style_K3_1_1() {
+            return {
+                pane: 'pane_K3_1',
+                opacity: 1,
+                color: 'rgba(56,128,54,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_K3_1');
+        map.getPane('pane_K3_1').style.zIndex = 401;
+        map.getPane('pane_K3_1').style['mix-blend-mode'] = 'normal';
+        var layer_K3_1 = new L.geoJson.multiStyle(json_K3_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_K3_1',
+            layerName: 'layer_K3_1',
+            pane: 'pane_K3_1',
+            onEachFeature: pop_K3_1,
+            styles: [style_K3_1_0,style_K3_1_1,]
+        });
+        bounds_group.addLayer(layer_K3_1);
+        map.addLayer(layer_K3_1);
+        function pop_Semplak_integrasi_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TIPEHAK'] !== null ? autolinker.link(feature.properties['TIPEHAK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NIB'] !== null ? autolinker.link(feature.properties['NIB'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NOP'] !== null ? autolinker.link(feature.properties['NOP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['luas_tls'] !== null ? autolinker.link(feature.properties['luas_tls'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['luas_sps'] !== null ? autolinker.link(feature.properties['luas_sps'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NIKS'] !== null ? autolinker.link(feature.properties['NIKS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['sbjk'] !== null ? autolinker.link(feature.properties['sbjk'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['wjb'] !== null ? autolinker.link(feature.properties['wjb'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Semplak_integrasi_2_0(feature) {
+            switch(String(feature.properties['NOP'])) {
+                default:
+                    return {
+                pane: 'pane_Semplak_integrasi_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(208,163,73,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'NOP':
+                    return {
+                pane: 'pane_Semplak_integrasi_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(213,71,235,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '[\'NOP 327104000700100030\', \'NOP 327104000700100070\', \'NOP 327104000700100120\', \'NOP 327104000700100320\', \'NOP 327104000700100480\', \'NOP 327104000700100560\', \'NOP 327104000700100760\', \'NOP 327104000700100810\', \'NOP 327104000700100820\', \'NOP 327104000700100860\', \'NOP 327104000700101010\', \'NOP 327104000700101040\', \'NOP 327104000700101050\', \'NOP 327104000700101080\', \'NOP 327104000700101190\', \'NOP 327104000700101260\', \'NOP 327104000700101310\', \'NOP 327104000700101330\', \'NOP 327104000700101400\', \'NOP 327104000700101440\', \'NOP 327104000700200020\', \'NOP 327104000700200090\', \'NOP 327104000700200110\', \'NOP 327104000700200120\', \'NOP 327104000700200240\', \'NOP 327104000700200250\', \'NOP 327104000700200260\', \'NOP 327104000700200280\', \'NOP 327104000700200300\', \'NOP 327104000700200350\', \'NOP 327104000700200380\', \'NOP 327104000700200490\', \'NOP 327104000700200640\', \'NOP 327104000700200700\', \'NOP 327104000700200930\', \'NOP 327104000700200940\', \'NOP 327104000700200970\', \'NOP 327104000700201000\', \'NOP 327104000700201090\', \'NOP 327104000700201100\', \'NOP 327104000700201470\', \'NOP 327104000700201520\', \'NOP 327104000700201610\', \'NOP 327104000700201680\', \'NOP 327104000700201700\', \'NOP 327104000700201730\', \'NOP 327104000700201750\', \'NOP 327104000700201780\', \'NOP 327104000700201850\', \'NOP 327104000700201920\', \'NOP 327104000700201950\', \'NOP 327104000700202010\', \'NOP 327104000700202020\', \'NOP 327104000700202170\', \'NOP 327104000700202200\', \'NOP 327104000700202290\', \'NOP 327104000700202300\', \'NOP 327104000700202350\', \'NOP 327104000700202360\', \'NOP 327104000700202420\', \'NOP 327104000700202490\', \'NOP 327104000700202570\', \'NOP 327104000700300040\', \'NOP 327104000700300060\', \'NOP 327104000700300070\', \'NOP 327104000700300100\', \'NOP 327104000700300170\', \'NOP 327104000700300190\', \'NOP 327104000700300220\', \'NOP 327104000700300230\', \'NOP 327104000700300280\', \'NOP 327104000700300320\', \'NOP 327104000700300330\', \'NOP 327104000700300340\', \'NOP 327104000700300360\', \'NOP 327104000700300380\', \'NOP 327104000700300400\', \'NOP 327104000700300410\', \'NOP 327104000700300430\', \'NOP 327104000700300470\', \'NOP 327104000700300520\', \'NOP 327104000700300530\', \'NOP 327104000700300540\', \'NOP 327104000700300610\', \'NOP 327104000700300660\', \'NOP 327104000700300720\', \'NOP 327104000700300730\', \'NOP 327104000700300990\', \'NOP 327104000700301030\', \'NOP 327104000700301100\', \'NOP 327104000700301240\', \'NOP 327104000700301280\', \'NOP 327104000700301310\', \'NOP 327104000700301340\', \'NOP 327104000700301350\', \'NOP 327104000700301400\', \'NOP 327104000700301410\', \'NOP 327104000700301440\', \'NOP 327104000700301500\', \'NOP 327104000700301550\', \'NOP 327104000700301580\', \'NOP 327104000700301620\', \'NOP 327104000700301680\', \'NOP 327104000700301690\', \'NOP 327104000700301740\', \'NOP 327104000700301770\', \'NOP 327104000700301810\', \'NOP 327104000700301950\', \'NOP 327104000700302000\', \'NOP 327104000700302090\', \'NOP 327104000700302150\', \'NOP 327104000700302310\', \'NOP 327104000700302360\', \'NOP 327104000700302410\', \'NOP 327104000700302470\', \'NOP 327104000700302960\', \'NOP 327104000700400360\', \'NOP 327104000700400440\', \'NOP 327104000700400500\', \'NOP 327104000700400520\', \'NOP 327104000700400530\', \'NOP 327104000700400560\', \'NOP 327104000700400670\', \'NOP 327104000700400690\', \'NOP 327104000700400730\', \'NOP 327104000700400750\', \'NOP 327104000700400820\', \'NOP 327104000700400870\', \'NOP 327104000700400910\', \'NOP 327104000700401080\', \'NOP 327104000700401120\', \'NOP 327104000700401140\', \'NOP 327104000700402120\', \'NOP 327104000700402240\', \'NOP 327104000700402260\', \'NOP 327104000700402290\', \'NOP 327104000700402300\', \'NOP 327104000700402850\', \'NOP 327104000700500010\', \'NOP 327104000700500040\', \'NOP 327104000700500090\', \'NOP 327104000700500120\', \'NOP 327104000700500170\', \'NOP 327104000700500200\', \'NOP 327104000700500290\', \'NOP 327104000700500300\', \'NOP 327104000700500380\', \'NOP 327104000700500410\', \'NOP 327104000700500470\', \'NOP 327104000700500570\', \'NOP 327104000700500580\', \'NOP 327104000700500590\', \'NOP 327104000700500640\', \'NOP 327104000700500650\', \'NOP 327104000700500660\', \'NOP 327104000700500700\', \'NOP 327104000700500720\', \'NOP 327104000700500760\', \'NOP 327104000700500790\', \'NOP 327104000700500800\', \'NOP 327104000700500820\', \'NOP 327104000700500850\', \'NOP 327104000700500890\', \'NOP 327104000700500900\', \'NOP 327104000700500910\', \'NOP 327104000700500930\', \'NOP 327104000700500940\', \'NOP 327104000700500950\', \'NOP 327104000700500980\', \'NOP 327104000700501030\', \'NOP 327104000700501070\', \'NOP 327104000700501220\', \'NOP 327104000700501250\', \'NOP 327104000700501280\', \'NOP 327104000700501340\', \'NOP 327104000700501680\', \'NOP 327104000700501690\', \'NOP 327104000700501700\', \'NOP 327104000700501760\', \'NOP 327104000700501780\', \'NOP 327104000700501810\', \'NOP 327104000700501820\', \'NOP 327104000700501840\', \'NOP 327104000700600060\', \'NOP 327104000700600110\', \'NOP 327104000700600130\', \'NOP 327104000700600150\', \'NOP 327104000700600290\', \'NOP 327104000700600330\', \'NOP 327104000700600360\', \'NOP 327104000700600460\', \'NOP 327104000700600480\', \'NOP 327104000700600490\', \'NOP 327104000700600550\', \'NOP 327104000700600750\', \'NOP 327104000700700090\', \'NOP 327104000700700410\', \'NOP 327104000700700480\', \'NOP 327104000700700490\', \'NOP 327104000700800050\', \'NOP 327104000700800070\', \'NOP 327104000700800100\', \'NOP 327104000700800130\', \'NOP 327104000700800160\', \'NOP 327104000700800170\', \'NOP 327104000700800330\', \'NOP 327104000700800350\', \'NOP 327104000700800390\', \'NOP 327104000700800460\', \'NOP 327104000700800470\', \'NOP 327104000700800510\', \'NOP 327104000700800530\', \'NOP 327104000700800620\', \'NOP 327104000700800640\', \'NOP 327104000700800700\', \'NOP 327104000700800750\', \'NOP 327104000700800800\', \'NOP 327104000700800930\', \'NOP 327104000700800940\', \'NOP 327104000700800970\', \'NOP 327104000700801000\', \'NOP 327104000700801050\', \'NOP 327104000700801070\', \'NOP 327104000700801090\', \'NOP 327104000700801110\', \'NOP 327104000700801120\', \'NOP 327104000700801130\', \'NOP 327104000700801150\', \'NOP 327104000700801160\', \'NOP 327104000700801230\', \'NOP 327104000700801240\', \'NOP 327104000700801360\', \'NOP 327104000700801420\', \'NOP 327104000700801450\', \'NOP 327104000700801520\', \'NOP 327104000700801530\', \'NOP 327104000700801540\', \'NOP 327104000700801610\', \'NOP 327104000700801750\', \'NOP 327104000700801760\', \'NOP 327104000700801880\', \'NOP 327104000700801890\', \'NOP 327104000700801910\', \'NOP 327104000700802070\', \'NOP 327104000700802080\', \'NOP 327104000700802110\', \'NOP 327104000700802130\', \'NOP 327104000700802180\', \'NOP 327104000700802250\', \'NOP 327104000700802360\', \'NOP 327104000700804240\', \'NOP 327104000700804380\', \'NOP 327104000700804510\', \'NOP 327104000700804850\', \'NOP 327104000700805350\', \'NOP 327104000700805520\', \'NOP 327104000700805760\', \'NOP 327104000700805830\', \'NOP 327104000700805860\', \'NOP 327104000700806430\', \'NOP 327104000700806450\', \'NOP 327104000700900190\', \'NOP 327104000700900420\', \'NOP 327104000700900450\', \'NOP 327104000700900500\', \'NOP 327104000700900530\', \'NOP 327104000700900590\', \'NOP 327104000700900620\', \'NOP 327104000700900630\', \'NOP 327104000700900660\', \'NOP 327104000700900700\', \'NOP 327104000700900730\', \'NOP 327104000700900760\', \'NOP 327104000700900770\', \'NOP 327104000700900840\', \'NOP 327104000700900850\', \'NOP 327104000700900870\', \'NOP 327104000700900910\', \'NOP 327104000700900970\', \'NOP 327104000700900990\', \'NOP 327104000700901000\', \'NOP 327104000700901020\', \'NOP 327104000700901040\', \'NOP 327104000700901070\', \'NOP 327104000700901870\', \'NOP 327104000700901970\', \'NOP 327104000701000020\', \'NOP 327104000701000040\', \'NOP 327104000701000050\', \'NOP 327104000701000110\', \'NOP 327104000701000180\', \'NOP 327104000701000200\', \'NOP 327104000701000210\', \'NOP 327104000701000220\', \'NOP 327104000701000260\', \'NOP 327104000701000320\', \'NOP 327104000701000620\', \'NOP 327104000701000640\', \'NOP 327104000701000690\', \'NOP 327104000701000820\', \'NOP 327104000701100020\', \'NOP 327104000701100051\', \'NOP 327104000701100200\', \'NOP 327104000701100330\', \'NOP 327104000701100370\', \'NOP 327104000701100410\', \'NOP 327104000701100420\', \'NOP 327104000701100470\', \'NOP 327104000701100530\', \'NOP 327104000701100550\', \'NOP 327104000701100570\', \'NOP 327104000701100580\', \'NOP 327104000701100700\', \'NOP 327104000701100720\', \'NOP 327104000701100740\', \'NOP 327104000701100760\', \'NOP 327104000701100880\', \'NOP 327104000701100970\', \'NOP 327104000701101070\', \'NOP 327104000701101080\', \'NOP 327104000701101120\', \'NOP 327104000701101150\', \'NOP 327104000701101240\', \'NOP 327104000701101270\', \'NOP 327104000701101310\', \'NOP 327104000701101330\', \'NOP 327104000701101430\', \'NOP 327104000701101550\', \'NOP 327104000701101580\', \'NOP 327104000701101640\', \'NOP 327104000701101730\', \'NOP 327104000701102110\', \'NOP 327104000701102150\', \'NOP 327104000701102200\', \'NOP 327104000701102210\', \'NOP 327104000701102220\', \'NOP 327104000701102260\', \'NOP 327104000701102430\', \'NOP 327104000701102650\', \'NOP 327104000701103010\', \'NOP 327104000701103030\', \'NOP 327104000701103190\', \'NOP 327104000701103340\', \'NOP 327104000701103400\', \'NOP 327104000701103410\', \'NOP 327104000701103430\', \'NOP 327104000701103440\', \'NOP 327104000701103480\', \'NOP 327104000701103490\', \'NOP 327104000701103520\', \'NOP 327104000701103600\', \'NOP 327104000701103620\', \'NOP 327104000701103660\', \'NOP 327104000701103700\', \'NOP 327104000701103720\', \'NOP 327104000701103730\', \'NOP 327104000701103790\', \'NOP 327104000701105670\', \'NOP 327104000701105920\', \'NOP 327104000701106560\', \'NOP 327104000701107330\', \'NOP 327104000701107360\', \'NOP 327104000701107830\', \'NOP 327104000701200080\', \'NOP 327104000701200090\', \'NOP 327104000701200100\', \'NOP 327104000701200310\', \'NOP 327104000701200350\', \'NOP 327104000701200360\', \'NOP 327104000701200510\', \'NOP 327104000701200710\', \'NOP 327104000701200740\', \'NOP 327104000701200750\', \'NOP 327104000701200880\', \'NOP 327104000701200930\', \'NOP 327104000701201000\', \'NOP 327104000701201010\', \'NOP 327104000701201040\', \'NOP 327104000701201200\', \'NOP 327104000701201260\', \'NOP 327104000701201270\', \'NOP 327104000701201280\', \'NOP 327104000701201290\', \'NOP 327104000701201320\', \'NOP 327104000701201330\', \'NOP 327104000701201360\', \'NOP 327104000701201500\', \'NOP 327104000701201520\', \'NOP 327104000701201540\', \'NOP 327104000701201720\', \'NOP 327104000701201760\', \'NOP 327104000701201940\', \'NOP 327104000701202990\', \'NOP 327104000701203070\', \'NOP 327104000701203100\', \'NOP 327104000701203250\', \'NOP 327104000701203260\', \'NOP 327104000701203280\', \'NOP 327104000701203340\', \'NOP 327104000701203370\', \'NOP 327104000701203380\', \'NOP 327104000701203540\', \'NOP 327104000701203560\', \'NOP 327104000701203600\', \'NOP 327104000701203810\', \'NOP 327104000701203820\', \'NOP 327104000701204000\', \'NOP 327104000701205650\', \'NOP 327104000701206030\', \'NOP 327104000701206450\', \'NOP 327104000701206460\', \'NOP 327104000701206470\', \'NOP 327104000701300120\', \'NOP 327104000701300190\', \'NOP 327104000701300670\', \'NOP 327104000701300860\', \'NOP 327104000701300890\', \'NOP 327104000701300960\', \'NOP 32710400700201120\']':
+                    return {
+                pane: 'pane_Semplak_integrasi_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(151,235,16,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Semplak_integrasi_2');
+        map.getPane('pane_Semplak_integrasi_2').style.zIndex = 402;
+        map.getPane('pane_Semplak_integrasi_2').style['mix-blend-mode'] = 'normal';
+        var layer_Semplak_integrasi_2 = new L.geoJson(json_Semplak_integrasi_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Semplak_integrasi_2',
+            layerName: 'layer_Semplak_integrasi_2',
+            pane: 'pane_Semplak_integrasi_2',
+            onEachFeature: pop_Semplak_integrasi_2,
+            style: style_Semplak_integrasi_2_0,
+        });
+        bounds_group.addLayer(layer_Semplak_integrasi_2);
+        map.addLayer(layer_Semplak_integrasi_2);
+        function pop_Pemanfaatan_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['manfaat'] !== null ? autolinker.link(feature.properties['manfaat'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Pemanfaatan_3_0(feature) {
+            switch(String(feature.properties['manfaat'])) {
+                case 'Pemanfaatan Fasilitas Umum':
+                    return {
+                pane: 'pane_Pemanfaatan_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(87,213,144,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pemanfaatan Kebun Campuran':
+                    return {
+                pane: 'pane_Pemanfaatan_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(49,148,230,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pemanfaatan Pertanian':
+                    return {
+                pane: 'pane_Pemanfaatan_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(145,75,230,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pemanfaatan Rumah Tinggal':
+                    return {
+                pane: 'pane_Pemanfaatan_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,106,21,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pemanfaatan Rumah TInggal':
+                    return {
+                pane: 'pane_Pemanfaatan_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,212,113,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_Pemanfaatan_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,72,154,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Pemanfaatan_3');
+        map.getPane('pane_Pemanfaatan_3').style.zIndex = 403;
+        map.getPane('pane_Pemanfaatan_3').style['mix-blend-mode'] = 'normal';
+        var layer_Pemanfaatan_3 = new L.geoJson(json_Pemanfaatan_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Pemanfaatan_3',
+            layerName: 'layer_Pemanfaatan_3',
+            pane: 'pane_Pemanfaatan_3',
+            onEachFeature: pop_Pemanfaatan_3,
+            style: style_Pemanfaatan_3_0,
+        });
+        bounds_group.addLayer(layer_Pemanfaatan_3);
+        map.addLayer(layer_Pemanfaatan_3);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: 'Pemanfaatan<br /><table><tr><td style="text-align: center;"><img src="legend/Pemanfaatan_3_PemanfaatanFasilitasUmum0.png" /></td><td>Pemanfaatan Fasilitas Umum</td></tr><tr><td style="text-align: center;"><img src="legend/Pemanfaatan_3_PemanfaatanKebunCampuran1.png" /></td><td>Pemanfaatan Kebun Campuran</td></tr><tr><td style="text-align: center;"><img src="legend/Pemanfaatan_3_PemanfaatanPertanian2.png" /></td><td>Pemanfaatan Pertanian</td></tr><tr><td style="text-align: center;"><img src="legend/Pemanfaatan_3_PemanfaatanRumahTinggal3.png" /></td><td>Pemanfaatan Rumah Tinggal</td></tr><tr><td style="text-align: center;"><img src="legend/Pemanfaatan_3_PemanfaatanRumahTInggal4.png" /></td><td>Pemanfaatan Rumah TInggal</td></tr><tr><td style="text-align: center;"><img src="legend/Pemanfaatan_3_5.png" /></td><td></td></tr></table>', layer: layer_Pemanfaatan_3},
+            {label: 'Semplak_integrasi<br /><table><tr><td style="text-align: center;"><img src="legend/Semplak_integrasi_2_0.png" /></td><td></td></tr><tr><td style="text-align: center;"><img src="legend/Semplak_integrasi_2_1.png" /></td><td>-</td></tr><tr><td style="text-align: center;"><img src="legend/Semplak_integrasi_2_NOP2.png" /></td><td>NOP</td></tr></table>', layer: layer_Semplak_integrasi_2},
+            {label: '<img src="legend/K3_1.png" /> K3', layer: layer_K3_1},
+            {label: "GOOGLE", layer: layer_GOOGLE_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: false, 
+        });
+        lay.addTo(map);
+		document.addEventListener("DOMContentLoaded", function() {
+            // set new Layers List height which considers toggle icon
+            function newLayersListHeight() {
+                var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
+                if (layerScrollbarElement) {
+                    var layersListElement = document.querySelector('.leaflet-control-layers-list');
+                    var originalHeight = layersListElement.style.height 
+                        || window.getComputedStyle(layersListElement).height;
+                    var newHeight = parseFloat(originalHeight) - 50;
+                    layersListElement.style.height = newHeight + 'px';
+                }
+            }
+            var isLayersListExpanded = true;
+            var controlLayersElement = document.querySelector('.leaflet-control-layers');
+            var toggleLayerControl = document.querySelector('.leaflet-control-layers-toggle');
+            // toggle Collapsed/Expanded and apply new Layers List height
+            toggleLayerControl.addEventListener('click', function() {
+                if (isLayersListExpanded) {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                } else {
+                    controlLayersElement.classList.add('leaflet-control-layers-expanded');
+                }
+                isLayersListExpanded = !isLayersListExpanded;
+                newLayersListHeight()
+            });	
+			// apply new Layers List height if toggle layerstree
+			if (controlLayersElement) {
+				controlLayersElement.addEventListener('click', function(event) {
+					var toggleLayerHeaderPointer = event.target.closest('.leaflet-layerstree-header-pointer span');
+					if (toggleLayerHeaderPointer) {
+						newLayersListHeight();
+					}
+				});
+			}
+            // Collapsed/Expanded at Start to apply new height
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            // Collapsed touch/small screen
+            var isSmallScreen = window.innerWidth < 650;
+            if (isSmallScreen) {
+                setTimeout(function() {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                    isLayersListExpanded = !isLayersListExpanded;
+                }, 500);
+            }  
+        });       
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_Semplak_integrasi_2,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'NIB'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        </script>
+    </body>
+</html>
